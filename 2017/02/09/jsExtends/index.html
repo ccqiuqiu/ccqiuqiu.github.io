@@ -623,7 +623,31 @@
                 <!-- Post Comments -->
                 
                     
-    
+    <!-- 使用 gitcoment -->
+<div id="gitment-comment">
+    <!-- Gitment 评论框 -->
+<div id="container"></div>
+</div>
+<style>
+    #gitment-comment{
+        background-color: #eee;
+        padding: 2pc;
+    }
+</style>
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        //id: '页面 ID', // 可选。默认为 location.href
+        owner: 'ccqiuqiu',
+        repo: 'ccqiuqiu.github.io',
+        oauth: {
+            client_id: '6f1f6fcff9ea0f27dcf2',
+            client_secret: '7293902700d0ce5a55ab20b1e407ce123755df24',
+        },
+    })
+    gitment.render('container')
+</script>
 
                 
             </div>
@@ -966,7 +990,7 @@ It will not impact the appearance and can give developers a lot of support :)
 
 
 
-   
+   <!-- Gitment -->
 
 
 
@@ -985,7 +1009,7 @@ It will not impact the appearance and can give developers a lot of support :)
 
     
         
-            <script>lsloader.load("prettify_js","/js/prettify.min.js?WN07fivHQSMKWy7BmHBB6w==", true)</script>
+            <script>lsloader.load("prettify_js","/js/prettify.min.js?th1hXjr1IykX/88domwL8w==", true)</script>
         
     
 
