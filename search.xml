@@ -4,6 +4,83 @@
   
     
     <entry>
+      <title><![CDATA[微信授权和jssdk部分接口的笔记]]></title>
+      <url>http://ccqiuqiu.win/2018/07/18/wx/</url>
+      <content type="html"><![CDATA[<h3 id="微信授权和jssdk部分接口的笔记"><a href="#微信授权和jssdk部分接口的笔记" class="headerlink" title="微信授权和jssdk部分接口的笔记"></a>微信授权和jssdk部分接口的笔记</h3><h4 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h4><ul>
+<li>微信接口测试号 <a href="https://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&amp;t=sandbox/index" target="_blank" rel="external">申请地址</a></li>
+<li>微信开发者工具</li>
+</ul>
+<h4 id="授权登录"><a href="#授权登录" class="headerlink" title="授权登录"></a>授权登录</h4><h5 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h5><ul>
+<li><p>前端引导用户授权（跳转授权链接）</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> APPID = <span class="string">'wx763ca0ce2d0b75e3'</span>  <span class="comment">// 公众号的appid</span></div><div class="line"><span class="keyword">var</span> REDIRECT_URI = <span class="string">'http://127.0.0.1:8081/VDS/wechat/auth.html'</span> <span class="comment">// 重定向的页面，请求微信授权页面后，微信服务端重定向的页面，微信会在这个页面的url后面加上code</span></div><div class="line"></div><div class="line"><span class="keyword">var</span> SCOPE = <span class="string">'snsapi_userinfo'</span></div><div class="line"><span class="keyword">var</span> STATE = <span class="string">'ddgr56'</span></div><div class="line"><span class="keyword">var</span> AUTH_URL = <span class="string">'https://open.weixin.qq.com/connect/oauth2/authorize?appid='</span></div><div class="line">+ APPID + <span class="string">'&amp;redirect_uri='</span> + REDIRECT_URI + <span class="string">'?url=$URL'</span> + <span class="string">'&amp;response_type=code&amp;scope='</span> + SCOPE + <span class="string">'&amp;state='</span> + STATE + <span class="string">'#wechat_redirect'</span></div><div class="line"></div><div class="line"><span class="comment">// 授权</span></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth</span>(<span class="params">url</span>) </span>&#123;</div><div class="line">  <span class="built_in">window</span>.location.href = getAuthUrl(url)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>上一步返回一个code，把code传回服务端</p>
+</li>
+<li>服务端通过code，请求微信服务器，拿到 access_token 和  openid</li>
+<li>一般，服务端返回openid给前端，授权成功</li>
+</ul>
+<h5 id="注意"><a href="#注意" class="headerlink" title="注意"></a><strong>注意</strong></h5><ul>
+<li>公众号配置网页授权域名，此域名必须是客户端配置的回调地址的域名，只需要域名，不能带‘http’<ul>
+<li><img src="./1531876963902.png" alt="Alt text"></li>
+</ul>
+</li>
+<li>正式的公众号不能用ip</li>
+</ul>
+<h4 id="微信jssdk使用前置条件"><a href="#微信jssdk使用前置条件" class="headerlink" title="微信jssdk使用前置条件"></a>微信jssdk使用前置条件</h4><ol>
+<li>配置接口安全域名<br><img src="./1531879830281.png" alt="Alt text"><br>此域名是需要使用微信jssdk的页面的域名</li>
+<li><p>通过config接口注入权限验证配置</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">wx.config(&#123;</div><div class="line">    debug: <span class="literal">true</span>, <span class="comment">// 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。</span></div><div class="line">    appId: <span class="string">''</span>, <span class="comment">// 必填，公众号的唯一标识</span></div><div class="line">    timestamp: , <span class="comment">// 必填，生成签名的时间戳</span></div><div class="line">    nonceStr: <span class="string">''</span>, <span class="comment">// 必填，生成签名的随机串</span></div><div class="line">    signature: <span class="string">''</span>,<span class="comment">// 必填，签名</span></div><div class="line">    jsApiList: [] <span class="comment">// 必填，需要使用的JS接口列表</span></div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</li>
+<li><p>获取signature</p>
+</li>
+</ol>
+<ul>
+<li>前端传递3个参数到后端<br>  timestamp 时间戳<br>  nonceStr:  随机字符串<br>  url: 需要调用jssdk接口的页面url<ul>
+<li>后端先请求微信服务器获取jsapi_ticket（每次签名时，都需要这个参数，所以，这个参数需要服务端保存起来，过期前不用每次请求）</li>
+</ul>
+</li>
+<li>后端对前端传回的参数进行签名（算法查文档），得到signature，返回给前端</li>
+</ul>
+<h4 id="注意-1"><a href="#注意-1" class="headerlink" title="注意"></a><strong>注意</strong></h4><ul>
+<li><p>获取jsapi_ticket，需要一个参数   access_token， 但是这个 access_token和授权登录的 access_token不一样！！！！！ 通过下面的接口获得</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https:<span class="comment">//api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&amp;appid=$&#123;appId&#125;&amp;secret=$&#123;secret&#125;</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>关于nonceStr参数，前端是大写S  后端是小写s ！！！！！</p>
+</li>
+</ul>
+<h4 id="定位-（wx-getLocation）"><a href="#定位-（wx-getLocation）" class="headerlink" title="定位 （wx.getLocation）"></a>定位 （wx.getLocation）</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">wx.getLocation(&#123;</div><div class="line">type: <span class="string">'wgs84'</span>, <span class="comment">// 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'</span></div><div class="line">success: <span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</div><div class="line"><span class="keyword">var</span> latitude = res.latitude; <span class="comment">// 纬度，浮点数，范围为90 ~ -90</span></div><div class="line"><span class="keyword">var</span> longitude = res.longitude; <span class="comment">// 经度，浮点数，范围为180 ~ -180。</span></div><div class="line"><span class="keyword">var</span> speed = res.speed; <span class="comment">// 速度，以米/每秒计</span></div><div class="line"><span class="keyword">var</span> accuracy = res.accuracy; <span class="comment">// 位置精度</span></div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a><strong>注意事项</strong></h4><ul>
+<li>关于type参数，如果需要使用第三方地图服务反向获取地址，需要正确设置这个值（具体看第三方地图服务需要的坐标类型）</li>
+<li>如果要获取地址，可以使用腾讯位置服务的 <a href="http://lbs.qq.com/webservice_v1/guide-gcoder.html" target="_blank" rel="external">逆地址解析</a></li>
+<li>上面接口需要使用jsonp请求，并设置  output 为 ‘jsonp’ ！！</li>
+</ul>
+<h4 id="获取图片"><a href="#获取图片" class="headerlink" title="获取图片"></a>获取图片</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">wx.chooseImage(&#123;</div><div class="line">count: <span class="number">1</span>, <span class="comment">// 默认9</span></div><div class="line">sizeType: [<span class="string">'original'</span>, <span class="string">'compressed'</span>], <span class="comment">// 可以指定是原图还是压缩图，默认二者都有</span></div><div class="line">sourceType: [<span class="string">'album'</span>, <span class="string">'camera'</span>], <span class="comment">// 可以指定来源是相册还是相机，默认二者都有</span></div><div class="line">success: <span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</div><div class="line"><span class="keyword">var</span> localIds = res.localIds; <span class="comment">// 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片</span></div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h4 id="获取图片接口返回的数据转base64"><a href="#获取图片接口返回的数据转base64" class="headerlink" title="获取图片接口返回的数据转base64"></a>获取图片接口返回的数据转base64</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">wx.getLocalImgData(&#123;</div><div class="line">localId: &apos;&apos;, // 图片的localID</div><div class="line">success: function (res) &#123;</div><div class="line">var localData = res.localData; // localData是图片的base64数据，可以用img标签显示</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<ul>
+<li>在ios上面，这个接口返回的是base64的图片，可以直接显示</li>
+<li>ios上面返回的头部是 data:image/jgp   可以替换成  data:image/jpeg 防止出现兼容问题</li>
+<li>android上，返回的数据不包含头部，需要手动添加  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">- android上，返回的数据可能包含换行，需要去掉换行</div><div class="line">```js</div><div class="line">wx.getLocalImgData(&#123;</div><div class="line">                localId: localIds[i],</div><div class="line">                success: function (res) &#123;</div><div class="line">                    var localData = res.localData;</div><div class="line">                    if (localData.indexOf(&apos;data:image&apos;) != 0) &#123;</div><div class="line">                        localData = &apos;data:image/jpeg;base64,&apos; +  localData</div><div class="line">                    &#125;</div><div class="line">                    localData = localData.replace(/\r|\n/g, &apos;&apos;).replace(&apos;data:image/jgp&apos;, &apos;data:image/jpeg&apos;)</div><div class="line">                    showImage(localData)</div><div class="line">                &#125;</div><div class="line">            &#125;);</div></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      
+        <categories>
+            
+            <category> js </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 微信 </tag>
+            
+            <tag> jssdk </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
       <title><![CDATA[前端编程风格指南]]></title>
       <url>http://ccqiuqiu.win/2017/11/03/codeStyle/</url>
       <content type="html"><![CDATA[<h1 id="前端编程风格指南"><a href="#前端编程风格指南" class="headerlink" title="前端编程风格指南"></a>前端编程风格指南</h1><blockquote>
