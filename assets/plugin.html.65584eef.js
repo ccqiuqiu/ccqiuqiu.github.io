@@ -1,0 +1,1 @@
+const t={key:"v-81a48e70",path:"/docs/qianxun/plugin.html",title:"plugin",lang:"zh-CN",frontmatter:{title:"plugin",date:"2020/05/28"},excerpt:"",headers:[],git:{createdTime:1659682765e3,updatedTime:1659682765e3,contributors:[{name:"xiongchaochao",email:"95353088@qq.com",commits:1}]},filePathRelative:"docs/qianxun/plugin.md"};export{t as data};
